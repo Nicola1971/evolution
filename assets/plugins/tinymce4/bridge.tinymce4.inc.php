@@ -16,10 +16,11 @@ class tinymce4bridge extends modxRTEbridge
             // Editor-Settings
             'editorLabel'   => 'TinyMCE4',           // Name displayed in Modx-Dropdowns - No HTML!
             'skinsDirectory'=> 'tinymce/skins',      // Relative to plugin-dir
-            'editorVersion' => '4.6.3',              // Version of TinyMCE4-Library
+            'skinthemeDirectory'=> 'tinymce/themes', // Relative to plugin-dir
+            'editorVersion' => '4.7.4',              // Version of TinyMCE4-Library
             'editorLogo'    => 'tinymce/logo.png',   // Optional Image displayed in Modx-settings
             
-            'bridgeParams'=>array('url_setup','style_formats','advanced_resizing','forced_root_block','contentsLangDirection','disabledButtons','selectorPrefix','selector','block_formats'),
+            'bridgeParams'=>array('url_setup','style_formats','advanced_resizing','forced_root_block','contentsLangDirection','disabledButtons','selectorPrefix','selector','block_formats','theme'),
     
             // Custom settings to show below Modx- / user-configuration
             'gSettingsCustom' => array(
@@ -335,5 +336,17 @@ class tinymce4bridge extends modxRTEbridge
         // params-string could be bridged/modified here from Modx-config to Editor-config
         // Right now its enough to return the string
         return $this->modxParams['blockFormats'];
+    }
+
+    // https://github.com/evolution-cms/evolution/issues/442
+    public function bridge_theme($selector) {
+        global $modx;
+        
+        // inlite-theme is only compatible with inline-mode / frontend
+        if($this->modxParams['skintheme'] == 'inlite' && $modx->event->name != 'OnWebPagePrerender') {
+            $this->set('theme', 'modern');     // Fallback to modern-theme in backend 
+        }
+        
+        return NULL;
     }
 }
