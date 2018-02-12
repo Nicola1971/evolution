@@ -1452,9 +1452,9 @@ class DocumentParser
                 continue;
             }
 
+            $value = $this->parseText($value, $params); // parse local scope placeholers for ConditionalTags
+            $value = $this->mergePlaceholderContent($value, $params);  // parse page global placeholers
             if ($this->config['enable_at_syntax']) {
-                $value = $this->parseText($value, $params); // parse local scope placeholers for ConditionalTags
-                $value = $this->mergePlaceholderContent($value, $params);  // parse page global placeholers
                 $value = $this->mergeConditionalTagsContent($value);
             }
             $value = $this->mergeDocumentContent($value);
@@ -2801,7 +2801,7 @@ class DocumentParser
         }
 
         if ($this->config['enable_cache']) {
-            $this->getDocumentObjectFromCache($this->documentIdentifier, true);
+            $this->documentContent = $this->getDocumentObjectFromCache($this->documentIdentifier, true);
         } else {
             $this->documentContent = '';
         }
@@ -5669,7 +5669,7 @@ class DocumentParser
         );
 
         $nl = "\n";
-        $list = isset($parsed['logo']) ? '<img src="/' . ltrim($parsed['logo'], "/") . '" style="float:right;max-width:100px;height:auto;" />' . $nl : '';
+        $list = isset($parsed['logo']) ? '<img src="' . $this->config['base_url'] . ltrim($parsed['logo'], "/") . '" style="float:right;max-width:100px;height:auto;" />' . $nl : '';
         $list .= '<p>' . $nl;
         $list .= isset($parsed['name']) ? '<strong>' . $parsed['name'] . '</strong><br/>' . $nl : '';
         $list .= isset($parsed['description']) ? $parsed['description'] . $nl : '';
@@ -6596,16 +6596,17 @@ class DocumentParser
  */
 class SystemEvent
 {
-    public $name;
-    public $_propagate;
-    public $_output;
-    public $activated;
-    public $activePlugin;
+    public $name = '';
+    public $_propagate = true;
+    public $_output = '';
+    public $activated = false;
+    public $activePlugin = '';
+    public $params = array();
 
     /**
      * @param string $name Name of the event
      */
-    function __construct($name = "")
+    public function __construct($name = "")
     {
         $this->_resetEventObject();
         $this->name = $name;
@@ -6617,7 +6618,7 @@ class SystemEvent
      * @global array $SystemAlertMsgQueque
      * @param string $msg The message
      */
-    function alert($msg)
+    public function alert($msg)
     {
         global $SystemAlertMsgQueque;
         if ($msg == "") {
@@ -6637,7 +6638,7 @@ class SystemEvent
      *
      * @param string $msg
      */
-    function output($msg)
+    public function output($msg)
     {
         $this->_output .= $msg;
     }
@@ -6645,12 +6646,12 @@ class SystemEvent
     /**
      * Stop event propogation
      */
-    function stopPropagation()
+    public function stopPropagation()
     {
         $this->_propagate = false;
     }
 
-    function _resetEventObject()
+    public function _resetEventObject()
     {
         unset ($this->returnedValues);
         $this->name = "";
