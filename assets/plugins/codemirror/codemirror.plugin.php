@@ -37,7 +37,8 @@ $undoDepth = (isset($undoDepth) ? $undoDepth : 200);
 $historyEventDelay = (isset($historyEventDelay) ? $historyEventDelay : 1250);
 $fontSize = (isset($fontSize) ? 'font-size:' . $fontSize . 'px !important;' : '');
 $lineHeight = (isset($lineHeight) ? 'line-height:' . $lineHeight . ' !important;' : '');
-if(isset($_COOKIE['MODX_themeColor']) && $_COOKIE['MODX_themeColor'] == 'dark') {
+
+if ($modx->config['manager_theme_mode'] == 3 || $modx->config['manager_theme_mode'] == 4) {
 	$theme = $darktheme;
 }
 /*

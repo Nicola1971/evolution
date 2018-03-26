@@ -1,5 +1,5 @@
 <?php
-if (IN_MANAGER_MODE != "true") {
+if( ! defined('IN_MANAGER_MODE') || IN_MANAGER_MODE !== true) {
     die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the EVO Content Manager instead of accessing this file directly.");
 }
 $mxla = $modx_lang_attribute ? $modx_lang_attribute : 'en';
@@ -16,8 +16,19 @@ if (!isset($modx->config['mgr_date_picker_path'])) {
     $modx->config['mgr_date_picker_path'] = 'media/script/air-datepicker/datepicker.inc.php';
 }
 
-if (!empty($_COOKIE['MODX_themeColor'])) {
-    $body_class .= ' ' . $_COOKIE['MODX_themeColor'];
+switch ($modx->config['manager_theme_mode']) {
+  case '1':
+    $body_class .= ' lightness';
+    break;
+  case '2':
+    $body_class .= ' light';
+    break;
+  case '3':
+    $body_class .= ' dark';
+    break;
+  case '4':
+    $body_class .= ' darkness';
+    break;
 }
 
 $css = 'media/style/' . $modx->config['manager_theme'] . '/style.css?v=' . $lastInstallTime;

@@ -1,5 +1,5 @@
 <?php
-if(IN_MANAGER_MODE != "true") {
+if( ! defined('IN_MANAGER_MODE') || IN_MANAGER_MODE !== true) {
 	die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the EVO Content Manager instead of accessing this file directly.");
 }
 
@@ -45,8 +45,6 @@ if(is_array($evtOut)) {
 		<?php if($modx->hasPermission('empty_trash')) { ?>
 			<a class="treeButton treeButtonDisabled" id="treeMenu_emptytrash" title="<?php echo $_lang['empty_recycle_bin_empty']; ?>"><?php echo $_style['empty_recycle_bin_empty']; ?></a>
 		<?php } ?>
-
-		<a class="treeButton" id="treeMenu_theme_dark" onclick="modx.tree.toggleTheme(event)"><i class="fa fa-adjust"></i></a>
 
 	</div>
 

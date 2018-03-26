@@ -1,6 +1,5 @@
 <?php
-
-if (IN_MANAGER_MODE != "true") {
+if( ! defined('IN_MANAGER_MODE') || IN_MANAGER_MODE !== true) {
     die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the EVO Content Manager instead of accessing this file directly.");
 }
 header("X-XSS-Protection: 0");
@@ -46,9 +45,21 @@ if (!$MODX_widthSideBar) {
     $body_class .= 'sidebar-closed';
 }
 
-if (isset($_COOKIE['MODX_themeColor'])) {
-    $body_class .= ' ' . $_COOKIE['MODX_themeColor'];
+switch ($modx->config['manager_theme_mode']) {
+  case '1':
+    $body_class .= ' lightness';
+    break;
+  case '2':
+    $body_class .= ' light';
+    break;
+  case '3':
+    $body_class .= ' dark';
+    break;
+  case '4':
+    $body_class .= ' darkness';
+    break;
 }
+
 
 if (isset($modx->pluginCache['ElementsInTree'])) {
     $body_class .= ' ElementsInTree';
@@ -315,6 +326,41 @@ $modx->config['global_tabs'] = (int)($modx->config['global_tabs'] && ($user['rol
                                 <?= $_style['menu_preview_site'] ?>
                             </a>
                         </li>
+                        <li id="account" class="dropdown account">
+                            <a href="javascript:;" class="dropdown-toggle" onclick="return false;">
+                                <span class="username"><?= $user['username'] ?></span>
+                                <?php if ($user['photo']) { ?>
+                                    <span class="icon photo" style="background-image: url(<?= MODX_SITE_URL . $user['photo'] ?>);"></span>
+                                <?php } else { ?>
+                                    <span class="icon"><?= $_style['menu_user'] ?></span>
+                                <?php } ?>
+                                <i id="msgCounter"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <?php if ($modx->hasPermission('messages')): ?>
+                                    <li id="newMail"></li>
+                                <?php endif; ?>
+                                <?php if ($modx->hasPermission('change_password')) { ?>
+                                    <li>
+                                        <a onclick="" href="index.php?a=28" target="main">
+                                            <?= $_style['page_change_password'] ?><?= $_lang['change_password'] ?>
+                                        </a>
+                                    </li>
+                                <?php } ?>
+                                <li>
+                                    <a href="index.php?a=8">
+                                        <?= $_style['page_logout'] ?><?= $_lang['logout'] ?>
+                                    </a>
+                                </li>
+                                <?php
+                                $style = $modx->config['settings_version'] != $modx->getVersionData('version') ? 'style="color:#ffff8a;"' : '';
+                                $version = 'Evolution';
+                                ?>
+                                <?php
+                                echo sprintf('<li><span class="dropdown-item" title="%s &ndash; %s" %s>' . $version . ' %s</span></li>', $site_name, $modx->getVersionData('full_appname'), $style, $modx->config['settings_version']);
+                                ?>
+                            </ul>
+                        </li>
                         <?php if ($modx->hasPermission('settings') || $modx->hasPermission('view_eventlog') || $modx->hasPermission('logs') || $modx->hasPermission('help')) { ?>
                             <li id="system" class="dropdown">
                                 <a href="javascript:;" class="dropdown-toggle" title="<?= $_lang['system'] ?>" onclick="return false;"><?= $_style['menu_system'] ?></a>
@@ -362,41 +408,6 @@ $modx->config['global_tabs'] = (int)($modx->config['global_tabs'] && ($user['rol
                                 </ul>
                             </li>
                         <?php } ?>
-                        <li id="account" class="dropdown account">
-                            <a href="javascript:;" class="dropdown-toggle" onclick="return false;">
-                                <span class="username"><?= $user['username'] ?></span>
-                                <?php if ($user['photo']) { ?>
-                                    <span class="icon photo" style="background-image: url(<?= MODX_SITE_URL . $user['photo'] ?>);"></span>
-                                <?php } else { ?>
-                                    <span class="icon"><?= $_style['menu_user'] ?></span>
-                                <?php } ?>
-                                <i id="msgCounter"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <?php if ($modx->hasPermission('messages')): ?>
-                                    <li id="newMail"></li>
-                                <?php endif; ?>
-                                <?php if ($modx->hasPermission('change_password')) { ?>
-                                    <li>
-                                        <a onclick="" href="index.php?a=28" target="main">
-                                            <?= $_style['page_change_password'] ?><?= $_lang['change_password'] ?>
-                                        </a>
-                                    </li>
-                                <?php } ?>
-                                <li>
-                                    <a href="index.php?a=8">
-                                        <?= $_style['page_logout'] ?><?= $_lang['logout'] ?>
-                                    </a>
-                                </li>
-                                <?php
-                                $style = $modx->config['settings_version'] != $modx->getVersionData('version') ? 'style="color:#ffff8a;"' : '';
-                                $version = 'Evolution';
-                                ?>
-                                <?php
-                                echo sprintf('<li><span class="dropdown-item" title="%s &ndash; %s" %s>' . $version . ' %s</span></li>', $site_name, $modx->getVersionData('full_appname'), $style, $modx->config['settings_version']);
-                                ?>
-                            </ul>
-                        </li>
                         <?php if ($modx->config['show_fullscreen_btn'] != "0") { ?>
                             <li id="fullscreen">
                                 <a href="javascript:;" onclick="toggleFullScreen();" id="toggleFullScreen" title="<?= $_lang["toggle_fullscreen"] ?>">
@@ -519,9 +530,15 @@ $modx->config['global_tabs'] = (int)($modx->config['global_tabs'] && ($user['rol
     </div>
 
     <?php
+    /**
+     * @param string $action
+     * @param string $img
+     * @param string $text
+     * @param bool $allowed
+     */
     function constructLink($action, $img, $text, $allowed)
     {
-        if ($allowed == 1) {
+        if ((bool)$allowed) {
             echo sprintf('<div class="menuLink" id="item%s" onclick="modx.tree.menuHandler(%s);">', $action, $action);
             echo sprintf('<i class="%s"></i> %s</div>', $img, $text);
         }

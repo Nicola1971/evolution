@@ -1,11 +1,16 @@
 <?php
-if (IN_MANAGER_MODE != "true") {
+if( ! defined('IN_MANAGER_MODE') || IN_MANAGER_MODE !== true) {
     die("<b>INCLUDE_ORDERING_ERROR</b><br /><br />Please use the EVO Content Manager instead of accessing this file directly.");
 }
 if (!$modx->hasPermission('logs')) {
     $modx->webAlertAndQuit($_lang["error_no_privileges"]);
 }
 
+/**
+ * @param array $array
+ * @param string $checkKey
+ * @return array
+ */
 function array_unique_multi($array, $checkKey)
 {
     // Use the builtin if we're not a multi-dimensional array
@@ -26,6 +31,11 @@ function array_unique_multi($array, $checkKey)
     return $ret;
 }
 
+/**
+ * @param array $array
+ * @param string $key
+ * @return array
+ */
 function record_sort($array, $key)
 {
     $hash = array();
@@ -176,10 +186,10 @@ if (isset($_REQUEST['log_submit'])) {
     // get the selections the user made.
     $sqladd = array();
     if ($_REQUEST['searchuser'] != 0) {
-        $sqladd[] = "internalKey='" . intval($_REQUEST['searchuser']) . "'";
+        $sqladd[] = "internalKey='" . (int)$_REQUEST['searchuser'] . "'";
     }
     if ($_REQUEST['action'] != 0) {
-        $sqladd[] = "action=" . intval($_REQUEST['action']);
+        $sqladd[] = "action=" . (int)$_REQUEST['action'];
     }
     if ($_REQUEST['itemid'] != 0 || $_REQUEST['itemid'] == "-") {
         $sqladd[] = "itemid='" . $_REQUEST['itemid'] . "'";
@@ -271,6 +281,8 @@ if ($limit < 1) {
                     <th class="sortable sortable-numeric" width="1%"><?= $_lang["mgrlog_itemid"] ?></th>
                     <th class="sortable"><?= $_lang["mgrlog_itemname"] ?></th>
                     <th class="sortable" width="1%"><?= $_lang["mgrlog_time"] ?></th>
+                    <th class="sortable" width="1%">IP</th>
+                    <th class="sortable" width="1%">USER_AGENT</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -295,6 +307,8 @@ if ($limit < 1) {
                         <td class="text-xs-right"><?= $logentry['itemid'] ?></td>
                         <td><?= $item ?></td>
                         <td class="text-nowrap"><?= $modx->toDateFormat($logentry['timestamp'] + $server_offset_time) ?></td>
+                        <td class="text-nowrap"><?= $logentry['ip'] ?></td>
+                        <td class="text-nowrap"><?= $logentry['useragent'] ?></td>
                     </tr>
                     <?php
                     $i++;
