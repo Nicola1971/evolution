@@ -18,9 +18,8 @@
 .sidebar-closed #tree { width: 0 !important; }
 .sidebar-closed #main, .sidebar-closed #resizer { left: 0 !important; }
 @media (min-width: 1200px) {
-#mainMenu { height: 3rem; }
-#tree, #main { top: 3rem; }
-#tree { font-size: .875rem }
+#mainMenu { height: 2.5rem; }
+#tree, #main { top: 2.5rem; }
 }
 @media (max-width: 840px) {
 #floater { left: 0; right: 0; margin: 0 auto; }
@@ -42,3 +41,8 @@ to { transform: rotate(360deg) }
 .dark #frameset { background-color: #202329 }
 .dark #main { background-color: #ecf0f1 }
 .dark #mainloader { background-color: rgba(0, 0, 0, 0.1); }
+/* darkness */
+.darkness { letter-spacing: .021em }
+.darkness #mainloader { background-color: rgba(0, 0, 0, 0.1); }
+.darkness, .darkness #frameset, .darkness #main { background-color: #282c34; color: #bdbdbd; }
+.darkness > form { background-color: #202329 }
