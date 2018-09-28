@@ -22,7 +22,7 @@ $genpassword = $input['newpassword'];
 $passwordgenmethod = $input['passwordgenmethod'];
 $passwordnotifymethod = $input['passwordnotifymethod'];
 $specifiedpassword = $input['specifiedpassword'];
-$email = $input['email'];
+$email = trim($input['email']);
 $oldemail = $input['oldemail'];
 $phone = $input['phone'];
 $mobilephone = $input['mobilephone'];
@@ -56,8 +56,8 @@ if($email == '' || !preg_match("/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,24}$/i", $
 // verify admin security
 if($_SESSION['mgrRole'] != 1) {
 	// Check to see if user tried to spoof a "1" (admin) role
-	if(!$modx->hasPermission('save_role')) {
-		webAlertAndQuit("Illegal attempt to create/modify administrator by non-administrator!");
+	if(!$modx->hasPermission('save_user')) {
+		webAlertAndQuit("Illegal attempt to create/modify administrator by non-administrator!", 12);
 	}
 	// Verify that the user being edited wasn't an admin and the user ID got spoofed
 	$rs = $modx->db->select('count(internalKey)', $tbl_user_attributes, "internalKey='{$id}' AND role=1");
@@ -357,7 +357,7 @@ switch($input['mode']) {
  * @param string $ufn
  */
 function sendMailMessage($email, $uid, $pwd, $ufn) {
-	global $modx, $_lang, $signupemail_message;
+	$modx = evolutionCMS(); global $_lang, $signupemail_message;
 	global $emailsubject, $emailsender;
 	global $site_name;
 	$manager_url = MODX_MANAGER_URL;
@@ -390,7 +390,7 @@ function sendMailMessage($email, $uid, $pwd, $ufn) {
  * @param int $id
  */
 function saveUserSettings($id) {
-	global $modx;
+	$modx = evolutionCMS();
 	$tbl_user_settings = $modx->getFullTableName('user_settings');
 
 	$ignore = array(

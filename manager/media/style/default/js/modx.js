@@ -1029,7 +1029,7 @@
               this.restoreTree();
             } else {
               modx.tabs({url: modx.MODX_MANAGER_URL + href, title: title + '<small>(' + id + ')</small>'});
-              if (modx.isMobile) modx.resizer.toggle();
+              if (modx.isMobile && w.innerWidth < modx.minWidth) modx.resizer.toggle();
             }
           }
           this.itemToChange = id;
@@ -1491,6 +1491,7 @@
         this.timer = null;
         this.olduid = '';
         this.closeactions = [6, 61, 62, 63, 94];
+        this.saveAndCloseActions = [75, 86, 99, 106];
         this.reload = typeof a.reload !== 'undefined' ? a.reload : 1;
         this.action = modx.getActionFromUrl(a.url);
         this.uid = modx.getActionFromUrl(a.url, 2) ? 'home' : modx.urlToUid(a.url);
@@ -1543,8 +1544,12 @@
           }
           this.page = d.createElement('div');
           this.page.id = 'evo-tab-page-' + this.uid;
-          this.page.className = 'evo-tab-page show';
-          this.page.innerHTML = '<iframe src="' + this.url + '" name="' + this.name + '" width="100%" height="100%" scrolling="auto" frameborder="0"></iframe>';
+          this.page.className = 'evo-tab-page iframe-scroller show';
+          if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+              this.page.innerHTML='<iframe class="tabframes" src="'+this.url+'" name="'+this.name+'" width="100%" height="100%" scrolling="no" frameborder="0"></iframe>';
+			  } else {
+              this.page.innerHTML='<iframe class="tabframes" src="'+this.url+'" name="'+this.name+'" width="100%" height="100%" scrolling="auto" frameborder="0"></iframe>'
+          };
           d.getElementById('main').appendChild(this.page);
           console.time('load-tab');
           this.page.firstElementChild.onload = function(e) {
@@ -1604,7 +1609,7 @@
               }
             });
           } else {
-            if (modx.getActionFromUrl(this.url, 2)) {
+            if (modx.getActionFromUrl(this.url, 2) || (~this.saveAndCloseActions.indexOf(modx.getActionFromUrl(this.url)) && parseInt(modx.main.getQueryVariable('r', this.url)))) {
               this.close(e);
             } else if (this.olduid !== this.uid && d.getElementById('evo-tab-' + this.uid)) {
               this.close(e);
@@ -1653,6 +1658,9 @@
           var documentDirty = this.page.firstElementChild.contentWindow.documentDirty;
           var checkDirt = !!this.page.firstElementChild.contentWindow.checkDirt;
           if (documentDirty && checkDirt && confirm(this.page.firstElementChild.contentWindow.checkDirt(e)) || !documentDirty) {
+            if (modx.tabs.selected === this.tab) {
+              tree.ca = 'open';
+            }
             modx.tabs.selected = this.tab.classList.contains('selected') ? this.tab.previousElementSibling : this.row.querySelector('.selected');
             this.page.parentNode.removeChild(this.page);
             this.row.removeChild(this.tab);

@@ -4,6 +4,7 @@ if (file_exists(dirname(__FILE__)."/../assets/cache/siteManager.php")) {
 }else{
     define('MGR_DIR', 'manager');
 }
+define('MODX_CLI', false);
 
 global $moduleName;
 global $moduleVersion;
@@ -121,35 +122,6 @@ if ($installMode == 0) {
         return;
     } else {
         echo '<span class="ok">'.$_lang['ok']."</span></p>";
-    }
-}
-
-if(!function_exists('parseProperties')) {
-    /**
-     * parses a resource property string and returns the result as an array
-     * duplicate of method in documentParser class
-     *
-     * @param string $propertyString
-     * @return array
-     */
-    function parseProperties($propertyString) {
-        $parameter= array ();
-        if (!empty ($propertyString)) {
-            $tmpParams= explode("&", $propertyString);
-            $countParams = count($tmpParams);
-            for ($x= 0; $x < $countParams; $x++) {
-                if (strpos($tmpParams[$x], '=', 0)) {
-                    $pTmp= explode("=", $tmpParams[$x]);
-                    $pvTmp= explode(";", trim($pTmp[1]));
-                    if ($pvTmp[1] == 'list' && $pvTmp[3] != "")
-                        $parameter[trim($pTmp[0])]= $pvTmp[3]; //list default
-                    else
-                        if ($pvTmp[1] != 'list' && $pvTmp[2] != "")
-                            $parameter[trim($pTmp[0])]= $pvTmp[2];
-                }
-            }
-        }
-        return $parameter;
     }
 }
 
@@ -587,8 +559,7 @@ if (isset ($_POST['plugin']) || $installData) {
                         }
                     }
                     if($insert === true) {
-                        $properties = mysqli_real_escape_string($conn, propUpdate($properties,$row['properties']));
-                        if(!mysqli_query($sqlParser->conn, "INSERT INTO $dbase.`".$table_prefix."site_plugins` (name,description,plugincode,properties,moduleguid,disabled,category) VALUES('$name','$desc','$plugin','$properties','$guid','0',$category);")) {
+                         if(!mysqli_query($sqlParser->conn, "INSERT INTO $dbase.`".$table_prefix."site_plugins` (name,description,plugincode,properties,moduleguid,disabled,category) VALUES('$name','$desc','$plugin','$props','$guid','0',$category);")) {
                             echo "<p>".mysqli_error($sqlParser->conn)."</p>";
                             return;
                         }
@@ -608,10 +579,11 @@ if (isset ($_POST['plugin']) || $installData) {
                     if ($ds) {
                         $row = mysqli_fetch_assoc($ds);
                         $id = $row["id"];
-                        // remove existing events
-                        mysqli_query($sqlParser->conn, 'DELETE FROM ' . $dbase . '.`' . $table_prefix . 'site_plugin_events` WHERE pluginid = \'' . $id . '\'');
+                        $_events = implode("','", $events);
                         // add new events
-                        mysqli_query($sqlParser->conn, "INSERT INTO $dbase.`" . $table_prefix . "site_plugin_events` (pluginid, evtid) SELECT '$id' as 'pluginid',se.id as 'evtid' FROM $dbase.`" . $table_prefix . "system_eventnames` se WHERE name IN ('" . implode("','", $events) . "')");
+                        mysqli_query($sqlParser->conn, "INSERT IGNORE INTO $dbase.`" . $table_prefix . "site_plugin_events` (pluginid, evtid) SELECT '$id' as 'pluginid',se.id as 'evtid' FROM $dbase.`" . $table_prefix . "system_eventnames` se WHERE name IN ('{$_events}')");
+                        // remove absent events
+                        mysqli_query($sqlParser->conn, "DELETE `pe` FROM {$dbase}.`{$table_prefix}site_plugin_events` `pe` LEFT JOIN {$dbase}.`{$table_prefix}system_eventnames` `se` ON `pe`.`evtid`=`se`.`id` AND `name` IN ('{$_events}') WHERE ISNULL(`name`) AND `pluginid` = {$id}");
                     }
                 }
             }

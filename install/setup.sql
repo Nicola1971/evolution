@@ -13,7 +13,7 @@ CREATE TABLE `{PREFIX}active_users` (
   `lasthit` int(20) NOT NULL default '0',
   `action` varchar(10) NOT NULL default '',
   `id` int(10) default NULL,
-  PRIMARY KEY (`sid`)
+  PRIMARY KEY (`sid`, `username`)
 ) ENGINE=MyISAM COMMENT='Contains data about last user action.';
 
 DROP TABLE IF EXISTS `{PREFIX}active_user_locks`;
@@ -1061,6 +1061,8 @@ REPLACE INTO `{PREFIX}system_eventnames`
 ('83','OnFriendlyURLSettingsRender','1','System Settings'),
 ('84','OnUserSettingsRender','1','System Settings'),
 ('85','OnInterfaceSettingsRender','1','System Settings'),
+('109','OnSecuritySettingsRender','1','System Settings'),
+('110','OnFileManagerSettingsRender','1','System Settings'),
 ('86','OnMiscSettingsRender','1','System Settings'),
 ('87','OnRichTextEditorRegister','1','RichText Editor'),
 ('88','OnRichTextEditorInit','1','RichText Editor'),
@@ -1100,9 +1102,20 @@ REPLACE INTO `{PREFIX}system_eventnames`
 ('214','OnManagerMenuPrerender','2',''),
 ('215','OnManagerTopPrerender','2',''),
 ('224','OnDocFormTemplateRender','1','Documents'),
+('225','OnBeforeMinifyCss', '1', ''),
 ('999','OnPageUnauthorized','1',''),
 ('1000','OnPageNotFound','1',''),
-('1001','OnFileBrowserUpload','1','File Browser Events');
+('1001','OnFileBrowserUpload','1','File Browser Events'),
+('1002','OnBeforeFileBrowserUpload','1','File Browser Events'),
+('1003','OnFileBrowserDelete','1','File Browser Events'),
+('1004','OnBeforeFileBrowserDelete','1','File Browser Events'),
+('1005','OnFileBrowserInit','1','File Browser Events'),
+('1006','OnFileBrowserMove','1','File Browser Events'),
+('1007','OnBeforeFileBrowserMove','1','File Browser Events'),
+('1008','OnFileBrowserCopy','1','File Browser Events'),
+('1009','OnBeforeFileBrowserCopy','1','File Browser Events'),
+('1010','OnBeforeFileBrowserRename','1','File Browser Events'),
+('1011','OnFileBrowserRename','1','File Browser Events');
 
 
 # ^ I don't think we need more than 1000 built-in events. Custom events will start at 1001

@@ -12,7 +12,7 @@ $tbl_web_groups = $modx->getFullTableName('web_groups');
 
 $input = $_POST;
 foreach($input as $k => $v) {
-	if($k !== 'comment') {
+	if($k !== 'comment' && $k !=='user_groups') {
 		$v = sanitize($v);
 	}
 	$input[$k] = $v;
@@ -27,7 +27,7 @@ $genpassword = $input['newpassword'];
 $passwordgenmethod = $input['passwordgenmethod'];
 $passwordnotifymethod = $input['passwordnotifymethod'];
 $specifiedpassword = $input['specifiedpassword'];
-$email = $input['email'];
+$email = trim($input['email']);
 $esc_email = $modx->db->escape($email);
 $oldemail = $input['oldemail'];
 $phone = $input['phone'];
@@ -364,7 +364,7 @@ function save_user_quoted_printable($string) {
  * @param string $ufn
  */
 function sendMailMessage($email, $uid, $pwd, $ufn) {
-	global $modx, $_lang, $websignupemail_message;
+	$modx = evolutionCMS(); global $_lang, $websignupemail_message;
 	global $emailsubject, $emailsender;
 	global $site_name, $site_url;
 	$message = sprintf($websignupemail_message, $uid, $pwd); // use old method
@@ -392,7 +392,7 @@ function sendMailMessage($email, $uid, $pwd, $ufn) {
 
 // Save User Settings
 function saveUserSettings($id) {
-	global $modx;
+	$modx = evolutionCMS();
 	$tbl_web_user_settings = $modx->getFullTableName('web_user_settings');
 
 	$settings = array(
@@ -440,7 +440,7 @@ function generate_password($length = 10) {
 }
 
 function sanitize($str = '', $safecount = 0) {
-	global $modx;
+	$modx = evolutionCMS();
 	$safecount++;
 	if(1000 < $safecount) {
 		exit("error too many loops '{$safecount}'");
